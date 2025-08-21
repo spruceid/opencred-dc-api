@@ -1002,7 +1002,7 @@ name = "dc-api-wasm"
 version = "0.1.0"
 dependencies = [
  "getrandom 0.3.3",
- "isomdl 0.1.0 (git+https://github.com/spruceid/isomdl?rev=0e53d21)",
+ "isomdl",
  "openid4vp",
  "serde",
  "serde-wasm-bindgen",
@@ -2276,12 +2276,6 @@ checksum = "7943c866cc5cd64cbc25b2e01621d07fa8eb2a1a23160ee81ce38704e97b8ecf"
 [[package]]
 name = "isomdl"
 version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a0f52cfd6f801fc46dde39cecd11c29a6d1ce24507c6a9c8bc607f3272570520"
-
-[[package]]
-name = "isomdl"
-version = "0.1.0"
 source = "git+https://github.com/spruceid/isomdl?rev=0e53d21#0e53d212d36b555170ed46171d2c701fd975fd1b"
 dependencies = [
  "aes",
@@ -3151,13 +3145,13 @@ checksum = "c08d65885ee38876c4f86fa503fb49d7b507c2b62552df7c70b2fce627e06381"
 [[package]]
 name = "openid4vp"
 version = "0.1.0"
-source = "git+https://github.com/spruceid/openid4vp?rev=98cd577#98cd57729785f1d629d43939b8fe250e40bd93ac"
+source = "git+https://github.com/spruceid/openid4vp?rev=5a3d7a1#5a3d7a1ded20c1aa426ff6f9b7b9634dc785fa30"
 dependencies = [
  "anyhow",
  "async-trait",
  "base64 0.21.7",
  "http 1.3.1",
- "isomdl 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "isomdl",
  "json-syntax",
  "jsonschema",
  "openid4vp-frontend",
@@ -3180,7 +3174,7 @@ dependencies = [
 [[package]]
 name = "openid4vp-frontend"
 version = "0.1.0"
-source = "git+https://github.com/spruceid/openid4vp?rev=98cd577#98cd57729785f1d629d43939b8fe250e40bd93ac"
+source = "git+https://github.com/spruceid/openid4vp?rev=5a3d7a1#5a3d7a1ded20c1aa426ff6f9b7b9634dc785fa30"
 dependencies = [
  "serde",
  "serde_json",
