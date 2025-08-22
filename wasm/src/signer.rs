@@ -77,7 +77,7 @@ impl std::fmt::Debug for JsRequestSigner {
     }
 }
 
-#[async_trait::async_trait]
+#[async_trait::async_trait(?Send)]
 impl RequestSigner for ShareableJsRequestSigner {
     type Error = JsErr;
 
