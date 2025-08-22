@@ -998,16 +998,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "dc-api-core"
+version = "0.1.0"
+dependencies = [
+ "isomdl",
+ "openid4vp",
+ "serde",
+ "uuid",
+]
+
+[[package]]
 name = "dc-api-wasm"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
+ "dc-api-core",
  "getrandom 0.3.3",
- "isomdl",
- "openid4vp",
+ "js-sys",
  "serde",
  "serde-wasm-bindgen",
  "wasm-bindgen",
  "wasm-bindgen-futures",
+ "web-sys",
 ]
 
 [[package]]
@@ -3145,7 +3157,6 @@ checksum = "c08d65885ee38876c4f86fa503fb49d7b507c2b62552df7c70b2fce627e06381"
 [[package]]
 name = "openid4vp"
 version = "0.1.0"
-source = "git+https://github.com/spruceid/openid4vp?rev=5a3d7a1#5a3d7a1ded20c1aa426ff6f9b7b9634dc785fa30"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -3174,7 +3185,6 @@ dependencies = [
 [[package]]
 name = "openid4vp-frontend"
 version = "0.1.0"
-source = "git+https://github.com/spruceid/openid4vp?rev=5a3d7a1#5a3d7a1ded20c1aa426ff6f9b7b9634dc785fa30"
 dependencies = [
  "serde",
  "serde_json",
