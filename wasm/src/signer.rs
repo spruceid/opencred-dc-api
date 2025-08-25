@@ -1,8 +1,24 @@
+use async_trait::async_trait;
 use dc_api_core::openid4vp::verifier::request_signer::{JWK, RequestSigner};
 use js_sys::{Function, Promise, Reflect, Uint8Array};
 use std::{fmt::Debug, sync::Arc};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
+
+#[wasm_bindgen(typescript_custom_section)]
+const TS_IFACE: &'static str = r#"
+export interface RequestSigner {
+  // Keep these synchronous to match the Rust trait above.
+  alg(): string;
+  jwk(): any;
+
+  // Must return a Promise of bytes.
+  sign(payload: Uint8Array): Promise<Uint8Array>;
+
+  // Optional; if absent, Rust falls back to sign()
+  try_sign?(payload: Uint8Array): Promise<Uint8Array>;
+}
+"#;
 
 #[derive(Debug, Clone)]
 pub struct JsErr(String);
@@ -53,11 +69,8 @@ fn js_to_vec_u8(v: &JsValue) -> Result<Vec<u8>, JsErr> {
     }
 }
 
-#[derive(Debug, Clone)]
-pub struct ShareableJsRequestSigner(Arc<JsRequestSigner>);
-
 #[wasm_bindgen]
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct JsRequestSigner {
     obj: JsValue,
 }
@@ -77,13 +90,13 @@ impl std::fmt::Debug for JsRequestSigner {
     }
 }
 
-#[async_trait::async_trait(?Send)]
-impl RequestSigner for ShareableJsRequestSigner {
+#[async_trait(?Send)]
+impl RequestSigner for JsRequestSigner {
     type Error = JsErr;
 
     fn alg(&self) -> Result<String, Self::Error> {
         // Allow either a string return or a Promise<string>.
-        let out = call_method(&self.0.obj, "alg", &[])?;
+        let out = call_method(&self.obj, "alg", &[])?;
         if out.is_instance_of::<Promise>() {
             // In a sync method, we can’t await; prefer requiring sync for `alg()`.
             // If you *really* need async here, change the trait to async and await.
@@ -96,7 +109,7 @@ impl RequestSigner for ShareableJsRequestSigner {
     }
 
     fn jwk(&self) -> Result<JWK, Self::Error> {
-        let out = call_method(&self.0.obj, "jwk", &[])?;
+        let out = call_method(&self.obj, "jwk", &[])?;
         if out.is_instance_of::<Promise>() {
             return Err(JsErr(
                 "`jwk()` must be synchronous; make it return a plain object".into(),
@@ -107,9 +120,9 @@ impl RequestSigner for ShareableJsRequestSigner {
 
     async fn sign(&self, payload: &[u8]) -> Vec<u8> {
         let arg = slice_to_u8_array(payload);
-        let out = match call_method(&self.0.obj, "sign", &[arg.into()]) {
+        let out = match call_method(&self.obj, "sign", &[arg.into()]) {
             Ok(v) => v,
-            Err(e) => return vec![], // or panic/log; you can also bubble via a different signature
+            Err(_e) => return vec![], // or panic/log; you can also bubble via a different signature
         };
         let resolved = if out.is_instance_of::<Promise>() {
             match await_promise(Promise::from(out)).await {
@@ -125,10 +138,10 @@ impl RequestSigner for ShareableJsRequestSigner {
     async fn try_sign(&self, payload: &[u8]) -> Result<Vec<u8>, Self::Error> {
         // Prefer a dedicated try_sign if provided. Otherwise fall back to sign().
         let has_try =
-            Reflect::has(&self.0.obj, &JsValue::from_str("try_sign")).map_err(JsErr::from)?;
+            Reflect::has(&self.obj, &JsValue::from_str("try_sign")).map_err(JsErr::from)?;
         if has_try {
             let arg = slice_to_u8_array(payload);
-            let out = call_method(&self.0.obj, "try_sign", &[arg.into()])?;
+            let out = call_method(&self.obj, "try_sign", &[arg.into()])?;
             let resolved = if out.is_instance_of::<Promise>() {
                 await_promise(Promise::from(out)).await?
             } else {

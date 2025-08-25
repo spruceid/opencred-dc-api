@@ -1,3 +1,4 @@
+#[cfg(target_arch = "wasm32")]
 pub mod signer;
 
 use dc_api_core::request::DCAPIRequest;
