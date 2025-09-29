@@ -1,6 +1,3 @@
-// #![cfg(target_arch = "wasm32")]
-
-// pub mod session_store;
 pub mod sessions;
 
 use std::sync::Arc;
