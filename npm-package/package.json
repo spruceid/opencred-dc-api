@@ -1,0 +1,47 @@
+{
+  "name": "@spruceid/dc-api",
+  "version": "0.1.0",
+  "description": "TypeScript/Node.js wrapper for DC API WASM binary",
+  "main": "src/dc_api_wasm.js",
+  "types": "src/dc_api_wasm.d.ts",
+  "files": [
+    "src/",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "npm run build:wasm && npm run build:ts",
+    "build:wasm": "./build-wasm.sh",
+    "build:ts": "tsc",
+    "clean": "rm -rf src/ node_modules/.cache",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "wasm",
+    "digital-credentials",
+    "verifiable-credentials",
+    "openid4vp",
+    "typescript",
+    "nodejs"
+  ],
+  "author": "SpruceID",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/spruceid/dc-api.git",
+    "directory": "npm-package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/jest": "^29.5.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -1,0 +1,4 @@
+# Workspace-level cargo configuration for wasm32 target support
+
+[target.wasm32]
+rustflags = ["--cfg", "getrandom_backend=\"wasm_js\""]
