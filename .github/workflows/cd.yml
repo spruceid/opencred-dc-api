@@ -1,0 +1,56 @@
+name: npm_cd
+
+on:
+  push:
+    tags:
+      - "npm/v[0-9]+.[0-9]+.[0-9]+"
+
+jobs:
+  validation:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./npm-package
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract version
+        run: |
+          echo "RELEASE_VERSION=${GITHUB_REF#refs/tags/npm/v}" >> $GITHUB_ENV
+      - name: Validate package version is correct
+        run: |
+          grep "\"version\": \"${RELEASE_VERSION}\"" package.json
+
+  publish-npm:
+    runs-on: ubuntu-latest
+    needs: validation
+    defaults:
+      run:
+        working-directory: ./npm-package
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
+      # Install Rust and wasm-bindgen for WASM build
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: wasm32-unknown-unknown
+          override: true
+
+      - name: Install wasm-bindgen-cli
+        run: cargo install wasm-bindgen-cli
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build WASM and package
+        run: npm run build
+
+      - name: Publish to npm
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_SPRUCEID_PUBLISH_TOKEN }}

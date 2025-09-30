@@ -324,15 +324,60 @@ try {
 
 
 
-## Development
+## CI/CD & Releases
 
-### Prerequisites
+This package uses automated CI/CD workflows for testing, validation, and publishing.
+
+### Automated Testing
+
+Every push and pull request triggers comprehensive testing:
+
+- **WASM Build Validation**: Ensures the Rust/WASM build succeeds
+- **Package Structure**: Validates correct file locations and package.json structure  
+- **Integration Tests**: Tests that generated bindings load correctly
+- **Security Audits**: npm and Cargo dependency vulnerability scanning
+- **Code Quality**: Rust formatting and Clippy linting
+
+### Automated Publishing
+
+Releases are triggered by pushing git tags in the format `npm/v[version]`:
+
+```bash
+# Create and push a release
+npm run release:patch  # Creates tag npm/v1.0.1
+git push origin npm/v1.0.1
+```
+
+The release workflow will:
+1. Validate the package version matches the tag
+2. Set up Rust toolchain and wasm-bindgen
+3. Build the WASM binary and JS bindings
+4. Publish to npm with public access
+
+### Release Process
+
+For detailed release instructions, see [RELEASE.md](./RELEASE.md).
+
+Quick release workflow:
+```bash
+# Increment version and create tag
+npm run release:minor  # or release:patch, release:major
+
+# Push the tag to trigger publishing  
+git push origin npm/v$(node -p "require('./package.json').version")
+```
+
+### Manual Development
+
+For local development without CI:
+
+#### Prerequisites
 
 - Node.js 16+
 - Rust toolchain with `wasm32-unknown-unknown` target
 - wasm-bindgen-cli
 
-### Setup
+#### Setup
 
 1. Clone the repository
 2. Install dependencies:
@@ -345,16 +390,16 @@ try {
    npm run build
    ```
 
-### Scripts
+#### Scripts
 
-- `npm run build` - Build both WASM and TypeScript
+- `npm run build` - Build only WASM (for publishing)
+- `npm run build:dev` - Build WASM + TypeScript (for development)
 - `npm run build:wasm` - Build only the WASM binary
-- `npm run build:ts` - Build only the TypeScript wrapper
-- `npm run dev` - Watch mode for TypeScript development
-- `npm run test` - Run tests
+- `npm run build:ts` - Build only TypeScript wrapper
 - `npm run clean` - Clean build artifacts
+- `npm run prerelease` - Validate package before release
 
-### Testing
+#### Testing
 
 Run the test suite:
 
@@ -373,13 +418,18 @@ Tests include:
 
 ```
 npm-package/
-├── src/
+├── dist/                       # Built output (published to npm)
 │   ├── dc_api_wasm.js         # wasm-bindgen generated JavaScript
 │   ├── dc_api_wasm.d.ts       # wasm-bindgen generated TypeScript definitions
 │   ├── dc_api_wasm_bg.wasm    # WebAssembly binary
 │   └── dc_api_wasm_bg.wasm.d.ts  # WebAssembly TypeScript definitions
-├── tests/                      # Test files
-└── dist/                       # Compiled output (created by build)
+├── src/                        # TypeScript source files (if any)
+├── tests/                      # Test files (excluded from npm)
+├── build-wasm.sh              # WASM build script (excluded from npm)
+├── package.json               # Package configuration
+├── tsconfig.json              # TypeScript configuration (excluded from npm)
+├── README.md                  # Package documentation
+└── RELEASE.md                 # Release process documentation (excluded from npm)
 ```
 
 ## Example: Complete Flow

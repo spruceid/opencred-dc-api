@@ -1,0 +1,154 @@
+name: npm_ci
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "npm-package/**"
+      - "wasm/**"
+      - "core/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - ".github/workflows/**"
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "npm-package/**"
+      - "wasm/**"
+      - "core/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - ".github/workflows/**"
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./npm-package
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: "./npm-package/package-lock.json"
+
+      # Install Rust and wasm-bindgen for WASM build
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: wasm32-unknown-unknown
+          override: true
+
+      - name: Install wasm-bindgen-cli
+        run: cargo install wasm-bindgen-cli
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Lint package.json and check formatting
+        run: |
+          # Validate package.json structure
+          node -e "const pkg = require('./package.json'); if (!pkg.main || !pkg.types) throw new Error('Missing main or types field')"
+
+          # Check for common issues
+          if [ -f "src/" ]; then
+            echo "❌ Error: src/ directory should not exist after restructure"
+            exit 1
+          fi
+
+      - name: Build WASM
+        run: npm run build:wasm
+
+      - name: Verify build outputs
+        run: |
+          if [ ! -f "dist/dc_api_wasm.js" ]; then
+            echo "❌ Missing dist/dc_api_wasm.js"
+            exit 1
+          fi
+          if [ ! -f "dist/dc_api_wasm.d.ts" ]; then
+            echo "❌ Missing dist/dc_api_wasm.d.ts"
+            exit 1
+          fi
+          if [ ! -f "dist/dc_api_wasm_bg.wasm" ]; then
+            echo "❌ Missing dist/dc_api_wasm_bg.wasm"
+            exit 1
+          fi
+          echo "✅ All build outputs present"
+
+      - name: Test package integrity
+        run: |
+          # Test that the built files can be required/imported
+          node -e "
+            try {
+              const wasm = require('./dist/dc_api_wasm.js');
+              console.log('✅ Package can be loaded successfully');
+            } catch (e) {
+              console.error('❌ Package loading failed:', e.message);
+              process.exit(1);
+            }
+          "
+
+      - name: Check package size
+        run: |
+          # Check if package size is reasonable (warn if > 10MB)
+          SIZE=$(du -sm dist/ | cut -f1)
+          if [ $SIZE -gt 10 ]; then
+            echo "⚠️  Warning: Package size is ${SIZE}MB, consider optimizing"
+          else
+            echo "✅ Package size is ${SIZE}MB"
+          fi
+
+      - name: Dry run publish
+        run: npm pack --dry-run
+
+  rust-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Cache Cargo dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Run Rust tests
+        run: cargo test --workspace
+
+      - name: Check Rust formatting
+        run: cargo fmt --all -- --check
+
+      - name: Run Clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+  security-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: "./npm-package/package-lock.json"
+
+      - name: Install npm dependencies
+        working-directory: ./npm-package
+        run: npm ci
+
+      - name: Run npm audit
+        working-directory: ./npm-package
+        run: npm audit --audit-level=moderate

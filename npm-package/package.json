@@ -14,7 +14,12 @@
     "build:ts": "tsc",
     "build:dev": "npm run build:wasm && npm run build:ts",
     "clean": "rm -rf dist/ node_modules/.cache",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "release:patch": "npm version patch && npm run release:tag",
+    "release:minor": "npm version minor && npm run release:tag",
+    "release:major": "npm version major && npm run release:tag",
+    "release:tag": "git tag npm/v$(node -p \"require('./package.json').version\") && echo 'Created tag npm/v'$(node -p \"require('./package.json').version\")'. Push with: git push origin npm/v'$(node -p \"require('./package.json').version\")",
+    "prerelease": "npm run clean && npm run build && npm pack --dry-run"
   },
   "keywords": [
     "wasm",
