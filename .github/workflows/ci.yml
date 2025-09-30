@@ -44,7 +44,9 @@ jobs:
           override: true
 
       - name: Install wasm-bindgen-cli
-        run: cargo install wasm-bindgen-cli
+        # NOTE: wasm-bindgen-cli needs to align with wasm-bindgen version
+        # in wasm/ crate dependency.
+        run: cargo install -f wasm-bindgen-cli --version 0.2.101
 
       - name: Install npm dependencies
         run: npm ci
@@ -132,7 +134,7 @@ jobs:
         run: cargo fmt --all -- --check
 
       - name: Run Clippy
-        run: cargo clippy --all-targets --all-features -- -D warnings
+        run: RUSTFLAGS='--cfg getrandom_backend="wasm_js"' cargo clippy --target wasm32-unknown-unknown --all-features -- -D warnings
 
   security-audit:
     runs-on: ubuntu-latest

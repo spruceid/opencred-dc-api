@@ -1,3 +1,6 @@
+#![cfg(target_arch = "wasm32")]
+#![allow(clippy::arc_with_non_send_sync)]
+
 pub mod sessions;
 
 use std::sync::Arc;
@@ -142,10 +145,10 @@ impl DcApi {
 
         // NOTE: Chrome crashes on processing the DC API response
         // when the request contains more than one request.
-        if let Some(user_agent) = user_agent {
-            if !user_agent.as_str().contains("Chrome") {
-                requests.push(DCAPIRequest::OrgIsoMDoc { data: annexc_res });
-            }
+        if let Some(user_agent) = user_agent
+            && !user_agent.as_str().contains("Chrome")
+        {
+            requests.push(DCAPIRequest::OrgIsoMDoc { data: annexc_res });
         }
 
         let value = serde_wasm_bindgen::to_value(&DCAPIRequests { requests })?;

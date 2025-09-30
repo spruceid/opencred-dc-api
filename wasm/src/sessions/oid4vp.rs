@@ -146,7 +146,6 @@ impl JsOid4VpSessionStore {
     }
 
     /// Utility functions for session management from JavaScript
-
     /// Create a new UUID for session identification
     #[wasm_bindgen(js_name = generateSessionUuid)]
     pub fn generate_session_uuid() -> String {
