@@ -1,0 +1,100 @@
+# Source files (Rust/WASM source, not built JS)
+../wasm/
+../core/
+../target/
+*.rs
+Cargo.toml
+Cargo.lock
+
+# TypeScript source files (if any)
+src/
+
+# Test files
+tests/
+*.test.ts
+*.test.js
+*.spec.ts
+*.spec.js
+
+# Development files
+tsconfig.json
+jest.config.js
+.eslintrc*
+.prettierrc*
+
+# Build tools and scripts
+build-wasm.sh
+*.sh
+.github/
+.vscode/
+.idea/
+
+# Documentation (except README)
+docs/
+*.md
+!README.md
+
+# Development dependencies
+node_modules/
+coverage/
+.nyc_output/
+
+# Cache and logs
+*.log
+.cache/
+.eslintcache
+*.tsbuildinfo
+build.log
+
+# Environment files
+.env*
+!.env.example
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Git files
+.git*
+!.gitignore
+
+# Lock files (keep package-lock.json for reproducible builds)
+yarn.lock
+pnpm-lock.yaml
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# IDE files
+*.swp
+*.swo
+
+# Runtime files
+*.pid
+*.seed
+*.pid.lock
+
+# Local development and test files
+.local/
+local/
+test-*.js
+diagnose-*.js
+setup-*.js
+opencred-fix.js
+cert-config.cnf
+generate-cert-*.sh
+
+# Examples and demos (if any)
+examples/
+demo/
+
+# Wasm directory (intermediate build artifacts)
+wasm/

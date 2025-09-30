@@ -24,12 +24,12 @@ if [ ! -f "$WASM_FILE" ]; then
 fi
 
 # Create output directory
-mkdir -p npm-package/wasm
+mkdir -p npm-package/dist
 
 # Generate JavaScript bindings with wasm-bindgen
 echo "Generating JavaScript bindings..."
 wasm-bindgen \
-  --out-dir npm-package/src \
+  --out-dir npm-package/dist \
   --target nodejs \
   --typescript \
   "$WASM_FILE"
@@ -47,4 +47,4 @@ wasm-bindgen \
 
 echo "✅ WASM build completed successfully!"
 echo "Generated files:"
-ls -la npm-package/wasm/
+ls -la npm-package/dist/
