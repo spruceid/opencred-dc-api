@@ -1,5 +1,5 @@
 {
-  "name": "@spruceid/dc-api",
+  "name": "@spruceid/opencred-dc-api",
   "version": "0.1.0",
   "description": "TypeScript/Node.js wrapper for DC API WASM binary",
   "main": "src/dc_api_wasm.js",
