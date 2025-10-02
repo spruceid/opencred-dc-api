@@ -34,17 +34,6 @@ wasm-bindgen \
   --typescript \
   "$WASM_FILE"
 
-# Create a simple package.json for the wasm directory
-# echo "Creating package.json for WASM module..."
-# cat > npm-package/wasm/package.json << 'JSON'
-# {
-#   "name": "dc-api-bindings",
-#   "version": "0.1.0",
-#   "main": "dc_api_wasm.js",
-#   "types": "dc_api_wasm.d.ts"
-# }
-# JSON
-
 echo "✅ WASM build completed successfully!"
 echo "Generated files:"
 ls -la npm-package/dist/
