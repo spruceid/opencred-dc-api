@@ -1,6 +1,6 @@
 {
   "name": "@spruceid/opencred-dc-api",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "TypeScript/Node.js wrapper for OpenCred DC API WASM binary",
   "main": "dist/dc_api_wasm.js",
   "types": "dist/dc_api_wasm.d.ts",
@@ -33,7 +33,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/spruceid/dc-api.git",
+    "url": "https://github.com/spruceid/opencred-dc-api.git",
     "directory": "npm-package"
   },
   "devDependencies": {
