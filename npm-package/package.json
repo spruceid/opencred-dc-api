@@ -1,6 +1,6 @@
 {
   "name": "@spruceid/opencred-dc-api",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "TypeScript/Node.js wrapper for OpenCred DC API WASM binary",
   "main": "dist/dc_api_wasm.js",
   "types": "dist/dc_api_wasm.d.ts",
