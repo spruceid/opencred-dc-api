@@ -71,17 +71,16 @@ impl SessionStorage {
         Self(engine)
     }
 
-    pub async fn new_session(&self) -> Result<SessionCreationResponse> {
-        let SessionCreation {
-            session,
-            session_creation_response,
-        } = Session::new_with_creation_response()?;
-
+    pub async fn new_session(&self) -> Result<SessionCreation> {
+        let session_creation = Session::new_with_creation_response()?;
         self.0
-            .new_session(session_creation_response.id.clone(), session)
+            .new_session(
+                session_creation.session_creation_response.id.clone(),
+                session_creation.session.clone(),
+            )
             .await?;
 
-        Ok(session_creation_response)
+        Ok(session_creation)
     }
 
     pub async fn get_session(&self, id: String, client_secret: String) -> Result<Option<Session>> {
