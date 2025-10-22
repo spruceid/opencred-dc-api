@@ -122,9 +122,10 @@ impl DcApi {
         let (annexc_res, annexc_state) = ac::initiate_inner(&self.config, &request)
             .await
             .map_err(|e| JsValue::from(e.to_string()))?;
-        let (annexd_res, annexd_state) = ad::initiate_inner(&self.verifier, &request)
-            .await
-            .map_err(|e| JsValue::from(e.to_string()))?;
+        let (annexd_res, annexd_state) =
+            ad::initiate_inner(&self.verifier, &request, session_id.clone())
+                .await
+                .map_err(|e| JsValue::from(e.to_string()))?;
 
         // Update the session state with the initiate annex states
         session.state = SessionState::Initiated {

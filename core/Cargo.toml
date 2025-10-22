@@ -13,8 +13,8 @@ ciborium = "0.2.2"
 coset = "0.3.8"
 getrandom = { version = "0.3.3", features = ["wasm_js"] }
 http = "1"
-openid4vp = { git = "https://github.com/spruceid/openid4vp", rev = "1be9740" }
-openid4vp-frontend = { git = "https://github.com/spruceid/openid4vp", rev = "1be9740" }
+openid4vp = { git = "https://github.com/spruceid/openid4vp", rev = "8d7ccc5", features = ["pkcs8"] }
+openid4vp-frontend = { git = "https://github.com/spruceid/openid4vp", rev = "8d7ccc5" }
 isomdl = { git = "https://github.com/spruceid/isomdl", rev = "0e53d21" }
 serde = { version = "=1.0.219", features = ["derive"] }
 hpke = { version = "0.13.0", default-features = false, features = ["alloc", "p256"] }

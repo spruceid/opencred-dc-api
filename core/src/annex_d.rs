@@ -38,6 +38,7 @@ use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use serde_json::json;
 use sha2::{Digest, Sha256};
 use tracing::debug;
+use uuid::Uuid;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct InitiatedSessionState {
@@ -54,6 +55,7 @@ pub struct InitiateResponse {
 pub async fn initiate_inner(
     verifier: &OID4VPVerifier,
     request: &DCAPINamespaceRequest,
+    session_id: String,
 ) -> Result<(InitiateResponse, InitiatedSessionState)> {
     let mut dcql_credential_query =
         DcqlCredentialQuery::new("0".into(), ClaimFormatDesignation::MsoMDoc);
@@ -102,6 +104,7 @@ pub async fn initiate_inner(
     getrandom::fill(&mut nonce).expect("Failed to generate nonce");
     let nonce = BASE64_URL_SAFE_NO_PAD.encode(nonce);
 
+    let uuid: Uuid = session_id.parse().context("session id must be Uuid type")?;
     let (oid4vp_session_id, request_jwt) = verifier
         .0
         .build_authorization_request()
@@ -111,7 +114,7 @@ pub async fn initiate_inner(
         .with_request_parameter(Nonce::from(nonce.clone()))
         .with_request_parameter(ResponseMode::DcApi)
         .with_request_parameter(ExpectedOrigins(vec![request.origin.clone()]))
-        .build_dc_api()
+        .build_dc_api_with_session_id(uuid)
         .await
         .context("Failed to build authorization request")?;
     debug!(
