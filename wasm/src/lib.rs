@@ -39,11 +39,15 @@ impl DcApi {
         base_url: String,
         submission_endpoint: String,
         reference_endpoint: String,
-        cert_chain_pem: Vec<u8>,
+        issuer_ca_x5c_pem: Vec<u8>,
+        reader_ca_x5c_pem: Vec<u8>,
         oid4vp_session_store: JsOid4VpSessionStore,
         js_dc_api_session_store: JsDcApiSessionStore,
     ) -> Result<Self, JsValue> {
-        let x5c = CertificateInner::load_pem_chain(&cert_chain_pem)
+        let issuer_ca_x5c = CertificateInner::load_pem_chain(&issuer_ca_x5c_pem)
+            .map_err(|e| JsValue::from(e.to_string()))?;
+
+        let reader_ca_x5c = CertificateInner::load_pem_chain(&reader_ca_x5c_pem)
             .map_err(|e| JsValue::from(e.to_string()))?;
 
         let base_url = base_url
@@ -55,7 +59,7 @@ impl DcApi {
             reference_endpoint,
             client: Client {
                 key,
-                x5c: x5c.clone(),
+                x5c: reader_ca_x5c,
             },
         };
         let oid4vp_client = OID4VPClient::new(&config).map_err(|e| JsValue::from(e.to_string()))?;
@@ -68,7 +72,7 @@ impl DcApi {
 
         // Construct trust anchor registry
         let trust_anchor_registry = TrustAnchorRegistry {
-            anchors: x5c
+            anchors: issuer_ca_x5c
                 .into_iter()
                 .map(|certificate| TrustAnchor {
                     certificate,
