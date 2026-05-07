@@ -47,7 +47,8 @@ const dcApi = await DcApi.new(
   'https://api.example.com',
   'https://api.example.com/submit',
   'https://api.example.com/reference',
-  new Uint8Array([/* your cert chain */]),
+  new Uint8Array([/* issuer CA chain (mDoc trust anchors) */]),
+  new Uint8Array([/* reader CA chain (verifier client cert) */]),
   oid4vpStore,
   dcApiStore
 );
@@ -116,7 +117,7 @@ import { DcApi } from '@spruceid/opencred-dc-api';
 
 #### Constructor
 
-##### `static new(key: string, base_url: string, submission_endpoint: string, reference_endpoint: string, cert_chain_pem: Uint8Array, oid4vp_session_store: JsOid4VpSessionStore, js_dc_api_session_store: DcApiSessionStore): Promise<DcApi>`
+##### `static new(key: string, base_url: string, submission_endpoint: string, reference_endpoint: string, issuer_ca_x5c_pem: Uint8Array, reader_ca_x5c_pem: Uint8Array, oid4vp_session_store: JsOid4VpSessionStore, js_dc_api_session_store: DcApiSessionStore): Promise<DcApi>`
 
 Create and initialize a new DC API instance.
 
@@ -125,9 +126,12 @@ Create and initialize a new DC API instance.
 - `base_url`: Base URL for the DC API
 - `submission_endpoint`: Endpoint for submitting responses
 - `reference_endpoint`: Endpoint for references
-- `cert_chain_pem`: Certificate chain in PEM format as Uint8Array
+- `issuer_ca_x5c_pem`: PEM-encoded chain of trusted issuer CAs, used as the trust anchor registry when verifying presented mDocs
+- `reader_ca_x5c_pem`: PEM-encoded chain for the reader/verifier client certificate, presented to the wallet during request signing
 - `oid4vp_session_store`: OID4VP session storage implementation
 - `js_dc_api_session_store`: DC API session storage implementation
+
+> **Security:** these two chains serve different roles and must not be the same value. Versions prior to 0.3.0 incorrectly reused a single chain for both roles. See the security advisory for upgrade guidance.
 
 ```typescript
 const privateKeyPem = `-----BEGIN PRIVATE KEY-----
@@ -139,7 +143,8 @@ const dcApi = await DcApi.new(
   'https://api.example.com',
   'https://api.example.com/submit',
   'https://api.example.com/reference',
-  certChainPem,
+  issuerCaX5cPem,
+  readerCaX5cPem,
   oid4vpStore,
   dcApiStore
 );
@@ -468,7 +473,8 @@ async function main() {
     process.env.DC_API_URL!,
     process.env.DC_API_SUBMIT_URL!,
     process.env.DC_API_REFERENCE_URL!,
-    new Uint8Array(Buffer.from(process.env.CERT_CHAIN!, 'base64')),
+    new Uint8Array(Buffer.from(process.env.ISSUER_CA_CHAIN!, 'base64')),
+    new Uint8Array(Buffer.from(process.env.READER_CA_CHAIN!, 'base64')),
     oid4vpStore,
     dcApiStore
   );

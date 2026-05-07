@@ -47,7 +47,8 @@ const dcApi = await DcApi.new(
   'https://api.example.com',
   'https://api.example.com/submit',
   'https://api.example.com/reference',
-  certChainPem,
+  issuerCaX5cPem,       // PEM chain of trusted issuer CAs (mDoc trust anchors)
+  readerCaX5cPem,       // PEM chain for the reader/verifier client cert
   oid4vpStore,
   dcApiStore
 );
