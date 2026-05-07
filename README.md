@@ -2,6 +2,12 @@
 
 A Rust-based Digital Credential API implementation providing OpenID4VP (OpenID for Verifiable Presentations) client functionality with WebAssembly support for Node.js/TypeScript environments.
 
+> ## ⚠️ Pre-1.0 software — use at your own risk
+>
+> This project has not reached a stable `1.0.0` release. The public API is subject to breaking changes between minor versions, and the codebase has **not** undergone an independent security audit or third-party penetration testing.
+>
+> Do not deploy in production trust-sensitive contexts without performing your own review. Known security issues are tracked in the repository's [Security Advisories](https://github.com/spruceid/dc-api/security/advisories).
+
 ## Overview
 
 DC API is a WebAssembly-based library that enables digital credential operations with full OpenID4VP protocol support. It provides session management, credential request/response handling, and X.509 certificate-based authentication.

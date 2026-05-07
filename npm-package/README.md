@@ -2,6 +2,12 @@
 
 A WebAssembly-based Node.js/TypeScript package for the DC API, providing digital credential operations with OpenID4VP support and session management through wasm-bindgen generated bindings.
 
+> ## ⚠️ Pre-1.0 software — use at your own risk
+>
+> This package has not reached a stable `1.0.0` release. The public API is subject to breaking changes between minor versions, and the underlying codebase has **not** undergone an independent security audit or third-party penetration testing.
+>
+> Do not deploy in production trust-sensitive contexts without performing your own review. Known security issues are tracked in the repository's [Security Advisories](https://github.com/spruceid/dc-api/security/advisories).
+
 ## Installation
 
 ```bash
