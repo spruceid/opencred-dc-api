@@ -1,6 +1,6 @@
 {
   "name": "@spruceid/opencred-dc-api",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "TypeScript/Node.js wrapper for OpenCred DC API WASM binary",
   "main": "dist/dc_api_wasm.js",
   "types": "dist/dc_api_wasm.d.ts",
@@ -13,6 +13,7 @@
     "build:wasm": "./build-wasm.sh",
     "build:ts": "tsc",
     "build:dev": "npm run build:wasm && npm run build:ts",
+    "test": "jest",
     "clean": "rm -rf dist/ node_modules/.cache",
     "prepublishOnly": "npm run build",
     "release:patch": "npm version patch && npm run release:tag",
