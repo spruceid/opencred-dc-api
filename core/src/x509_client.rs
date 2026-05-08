@@ -130,3 +130,40 @@ async fn make_jwt<S: RequestSigner + ?Sized>(
     let signature_b64 = BASE64_URL_SAFE_NO_PAD.encode(signature);
     Ok(format!("{header_b64}.{body_b64}.{signature_b64}"))
 }
+
+#[cfg(test)]
+mod tests {
+    use openid4vp::verifier::request_signer::P256Signer;
+    use p256::elliptic_curve::rand_core::OsRng;
+    use x509_cert::certificate::CertificateInner;
+
+    use super::*;
+
+    const CERT_CHAIN_PEM: &[u8] = b"-----BEGIN CERTIFICATE-----
+MIICBDCCAaqgAwIBAgIUGgff3n8FETWQOElmhyJgIFCuw7swCgYIKoZIzj0EAwIw
+TDELMAkGA1UEBhMCVVMxDjAMBgNVBAgMBVVTLUNBMQ8wDQYDVQQKDAZDQS1ETVYx
+HDAaBgNVBAMME0NhbGlmb3JuaWEgRE1WIFRlc3QwHhcNMjYwMzEzMDAxNDA1WhcN
+MzYwMzEwMDAxNDA1WjBMMQswCQYDVQQGEwJVUzEOMAwGA1UECAwFVVMtQ0ExDzAN
+BgNVBAoMBkNBLURNVjEcMBoGA1UEAwwTQ2FsaWZvcm5pYSBETVYgVGVzdDBZMBMG
+ByqGSM49AgEGCCqGSM49AwEHA0IABMZxjYHR7SMNedpoqURMqEkS8eIFI2kNwWiV
+F8y2pr7UJJOJoWXqY0x/KCUrbtpiaCtKfHebsP1nuN+D6TbLNvqjajBoMB0GA1Ud
+DgQWBBTtKzxtYzVAM/ulLn2fbSAM1EZrujAfBgNVHSMEGDAWgBTtKzxtYzVAM/ul
+Ln2fbSAM1EZrujAPBgNVHRMBAf8EBTADAQH/MBUGA1UdEQQOMAyCCmRtdi5jYS5n
+b3YwCgYIKoZIzj0EAwIDSAAwRQIgHkb0AlN/biyOZnhsjS2vUoI5rwU22dbGf2tv
+UndDlH0CIQD4ibjRKaN7nV1sa34Tr4xjt3BQehQFugXbJ7ajVNETEA==
+-----END CERTIFICATE-----";
+
+    #[test]
+    fn test_x5chain() {
+        let x5c =
+            CertificateInner::load_pem_chain(CERT_CHAIN_PEM).expect("failed to load PEM chain");
+        assert_eq!(x5c.len(), 1);
+
+        let secret_key = p256::SecretKey::random(&mut OsRng);
+        let signer = P256Signer::new(secret_key.into()).expect("failed to create signer");
+
+        let client = X509SanClient::new(x5c, Arc::new(signer), X509SanVariant::Dns)
+            .expect("failed to create X509SanClient");
+        assert_eq!(client.id.0, "x509_san_dns:dmv.ca.gov");
+    }
+}
