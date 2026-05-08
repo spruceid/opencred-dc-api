@@ -5,6 +5,12 @@ version = "0.1.0"
 edition = "2024"
 license = "Apache-2.0 OR MIT"
 
+[features]
+default = []
+# Enables tsify-next derives on user-facing serde types so the wasm
+# crate can expose typed JS/TS interfaces instead of opaque JsValues.
+wasm = ["dep:tsify", "dep:wasm-bindgen"]
+
 [dependencies]
 anyhow = "1.0.99"
 async-trait = "0.1.89"
@@ -27,3 +33,5 @@ url = { version = "2.5.4", features = ["serde"] }
 uuid = { version = "1.10.0", features = ["serde"] }
 x509-cert = { version = "0.2.4", features = ["builder", "hazmat"] }
 tracing = "0.1.41"
+tsify = { version = "0.5", default-features = false, features = ["js"], optional = true }
+wasm-bindgen = { version = "=0.2.101", optional = true }

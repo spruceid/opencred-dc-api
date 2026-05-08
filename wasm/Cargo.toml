@@ -8,12 +8,14 @@ license = "Apache-2.0 OR MIT"
 crate-type = ["cdylib"]
 
 [dependencies]
-dc-api-core = { path = "../core" }
-wasm-bindgen = { version = "0.2.100", features = ["serde-serialize"] }
+dc-api-core = { path = "../core", features = ["wasm"] }
+wasm-bindgen = { version = "=0.2.101", features = ["serde-serialize"] }
+tsify = { version = "0.5", default-features = false, features = ["js"] }
 wasm-bindgen-futures = "0.4.50"
 js-sys = "0.3.77"
 web-sys = { version = "0.3.77", features = ["console"] }
 serde = { version = "1.0", features = ["derive"] }
+serde_bytes = "0.11"
 serde-wasm-bindgen = "0.6.5"
 async-trait = "0.1.89"
 time = { version = "=0.3.36", features = ["wasm-bindgen"] }

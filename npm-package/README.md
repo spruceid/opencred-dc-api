@@ -49,12 +49,14 @@ const dcApiStore = {
 
 // Create and initialize DC API instance
 const dcApi = await DcApi.new(
-  privateKeyPem,  // PKCS8 PEM encoded private key for signing
-  'https://api.example.com',
-  'https://api.example.com/submit',
-  'https://api.example.com/reference',
-  new Uint8Array([/* issuer CA chain (mDoc trust anchors) */]),
-  new Uint8Array([/* reader CA chain (verifier client cert) */]),
+  {
+    key: privateKeyPem,  // PKCS8 PEM encoded private key for signing
+    baseUrl: 'https://api.example.com',
+    submissionEndpoint: 'https://api.example.com/submit',
+    referenceEndpoint: 'https://api.example.com/reference',
+    issuerCaX5cPem: new Uint8Array([/* issuer CA chain (mDoc trust anchors) */]),
+    readerCaX5cPem: new Uint8Array([/* reader CA chain (verifier client cert) */]),
+  },
   oid4vpStore,
   dcApiStore
 );
@@ -69,7 +71,7 @@ const request = {
 
 const result = await dcApi.initiate_request(
   session.id,
-  session.secret,
+  session.clientSecret,
   request,
   'my-app/1.0.0'
 );
@@ -82,7 +84,7 @@ const response = {
 
 const submitResult = await dcApi.submit_response(
   session.id,
-  session.secret,
+  session.clientSecret,
   response
 );
 
@@ -123,21 +125,23 @@ import { DcApi } from '@spruceid/opencred-dc-api';
 
 #### Constructor
 
-##### `static new(key: string, base_url: string, submission_endpoint: string, reference_endpoint: string, issuer_ca_x5c_pem: Uint8Array, reader_ca_x5c_pem: Uint8Array, oid4vp_session_store: JsOid4VpSessionStore, js_dc_api_session_store: DcApiSessionStore): Promise<DcApi>`
+##### `static new(config: DcApiConfig, oid4vp_session_store: JsOid4VpSessionStore, js_dc_api_session_store: DcApiSessionStore): Promise<DcApi>`
 
 Create and initialize a new DC API instance.
 
-**Parameters:**
-- `key`: PKCS8 PEM encoded private key used for signing operations
-- `base_url`: Base URL for the DC API
-- `submission_endpoint`: Endpoint for submitting responses
-- `reference_endpoint`: Endpoint for references
-- `issuer_ca_x5c_pem`: PEM-encoded chain of trusted issuer CAs, used as the trust anchor registry when verifying presented mDocs
-- `reader_ca_x5c_pem`: PEM-encoded chain for the reader/verifier client certificate, presented to the wallet during request signing
+**`DcApiConfig` fields:**
+- `key`: PKCS#8 PEM encoded private key used for signing operations
+- `baseUrl`: Base URL for the DC API
+- `submissionEndpoint`: Endpoint for submitting responses
+- `referenceEndpoint`: Endpoint for `request_uri` references
+- `issuerCaX5cPem`: PEM-encoded chain of trusted issuer CAs, used as the trust anchor registry when verifying presented mDocs (`Uint8Array`)
+- `readerCaX5cPem`: PEM-encoded chain for the reader/verifier client certificate, presented to the wallet during request signing (`Uint8Array`)
+
+**Other parameters:**
 - `oid4vp_session_store`: OID4VP session storage implementation
 - `js_dc_api_session_store`: DC API session storage implementation
 
-> **Security:** these two chains serve different roles and must not be the same value. Versions prior to 0.3.0 incorrectly reused a single chain for both roles. See the security advisory for upgrade guidance.
+> **Security:** the issuer and reader chains serve different trust roles and must not be the same value. Versions prior to 0.3.0 accepted a single chain and reused it for both roles. See the security advisory for upgrade guidance.
 
 ```typescript
 const privateKeyPem = `-----BEGIN PRIVATE KEY-----
@@ -145,12 +149,14 @@ MIGH...
 -----END PRIVATE KEY-----`;
 
 const dcApi = await DcApi.new(
-  privateKeyPem,
-  'https://api.example.com',
-  'https://api.example.com/submit',
-  'https://api.example.com/reference',
-  issuerCaX5cPem,
-  readerCaX5cPem,
+  {
+    key: privateKeyPem,
+    baseUrl: 'https://api.example.com',
+    submissionEndpoint: 'https://api.example.com/submit',
+    referenceEndpoint: 'https://api.example.com/reference',
+    issuerCaX5cPem,
+    readerCaX5cPem,
+  },
   oid4vpStore,
   dcApiStore
 );
@@ -475,12 +481,14 @@ async function main() {
   // Initialize the API
   const privateKeyPem = process.env.PRIVATE_KEY_PEM!; // PKCS8 PEM private key
   const dcApi = await DcApi.new(
-    privateKeyPem,
-    process.env.DC_API_URL!,
-    process.env.DC_API_SUBMIT_URL!,
-    process.env.DC_API_REFERENCE_URL!,
-    new Uint8Array(Buffer.from(process.env.ISSUER_CA_CHAIN!, 'base64')),
-    new Uint8Array(Buffer.from(process.env.READER_CA_CHAIN!, 'base64')),
+    {
+      key: privateKeyPem,
+      baseUrl: process.env.DC_API_URL!,
+      submissionEndpoint: process.env.DC_API_SUBMIT_URL!,
+      referenceEndpoint: process.env.DC_API_REFERENCE_URL!,
+      issuerCaX5cPem: new Uint8Array(Buffer.from(process.env.ISSUER_CA_CHAIN!, 'base64')),
+      readerCaX5cPem: new Uint8Array(Buffer.from(process.env.READER_CA_CHAIN!, 'base64')),
+    },
     oid4vpStore,
     dcApiStore
   );
@@ -501,7 +509,7 @@ async function main() {
     // Make the request
     const result = await dcApi.initiate_request(
       session.id,
-      session.secret,
+      session.clientSecret,
       request,
       'my-app/1.0.0'
     );
@@ -515,7 +523,7 @@ async function main() {
 
     const submitResult = await dcApi.submit_response(
       session.id,
-      session.secret,
+      session.clientSecret,
       response
     );
 

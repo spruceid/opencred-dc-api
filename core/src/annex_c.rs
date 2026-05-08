@@ -185,8 +185,10 @@ pub async fn initiate_inner(
 }
 
 #[derive(Clone, Deserialize, Serialize)]
-pub struct DCAPIResponseData {
-    response: String,
+#[cfg_attr(feature = "wasm", derive(tsify::Tsify))]
+#[cfg_attr(feature = "wasm", tsify(into_wasm_abi, from_wasm_abi))]
+pub struct MDocResponseData {
+    pub response: String,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -228,7 +230,7 @@ impl Handover {
 pub async fn submit_dc_response_inner(
     state: InitiatedSessionState,
     trust_anchor_registry: TrustAnchorRegistry,
-    dc_response: DCAPIResponseData,
+    dc_response: MDocResponseData,
 ) -> Result<ResponseAuthenticationOutcome, (StatusCode, serde_json::Value)> {
     let response = dc_response.response;
     let response_bytes = BASE64_URL_SAFE_NO_PAD.decode(response).map_err(|e| {

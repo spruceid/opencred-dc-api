@@ -6,6 +6,8 @@ use base64::{Engine, prelude::BASE64_STANDARD};
 use isomdl::presentation::authentication::ResponseAuthenticationOutcome;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha512};
+#[cfg(feature = "wasm")]
+use tsify::Tsify;
 use uuid::Uuid;
 
 #[cfg_attr(target_arch="wasm32", async_trait(?Send))]
@@ -127,9 +129,12 @@ impl SessionStorage {
 }
 
 #[derive(Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "wasm", derive(Tsify))]
+#[cfg_attr(feature = "wasm", tsify(into_wasm_abi, from_wasm_abi))]
+#[serde(rename_all = "camelCase")]
 pub struct SessionCreationResponse {
-    id: String,
-    client_secret: String,
+    pub id: String,
+    pub client_secret: String,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
