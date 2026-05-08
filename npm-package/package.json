@@ -1,6 +1,6 @@
 {
   "name": "@spruceid/opencred-dc-api",
-  "version": "0.3.0",
+  "version": "0.3.0-rc.1",
   "description": "TypeScript/Node.js wrapper for OpenCred DC API WASM binary",
   "main": "dist/dc_api_wasm.js",
   "types": "dist/dc_api_wasm.d.ts",
@@ -19,6 +19,7 @@
     "release:patch": "npm version patch && npm run release:tag",
     "release:minor": "npm version minor && npm run release:tag",
     "release:major": "npm version major && npm run release:tag",
+    "release:prerelease": "npm version prerelease --preid=rc && npm run release:tag",
     "release:tag": "git tag npm/v$(node -p \"require('./package.json').version\") && echo 'Created tag npm/v'$(node -p \"require('./package.json').version\")'. Push with: git push origin npm/v'$(node -p \"require('./package.json').version\")",
     "prerelease": "npm run clean && npm run build && npm pack --dry-run"
   },
