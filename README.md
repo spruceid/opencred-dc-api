@@ -2,6 +2,12 @@
 
 A Rust-based Digital Credential API implementation providing OpenID4VP (OpenID for Verifiable Presentations) client functionality with WebAssembly support for Node.js/TypeScript environments.
 
+> ## ⚠️ Pre-1.0 software — use at your own risk
+>
+> This project has not reached a stable `1.0.0` release. The public API is subject to breaking changes between minor versions, and the codebase has **not** undergone an independent security audit or third-party penetration testing.
+>
+> Do not deploy in production trust-sensitive contexts without performing your own review. Known security issues are tracked in the repository's [Security Advisories](https://github.com/spruceid/dc-api/security/advisories).
+
 ## Overview
 
 DC API is a WebAssembly-based library that enables digital credential operations with full OpenID4VP protocol support. It provides session management, credential request/response handling, and X.509 certificate-based authentication.
@@ -43,17 +49,20 @@ const oid4vpStore = JsOid4VpSessionStore.createMemoryStore();
 const dcApiStore = /* implement DcApiSessionStore interface */;
 
 const dcApi = await DcApi.new(
-  privateKeyPem,        // PKCS8 PEM encoded private key
-  'https://api.example.com',
-  'https://api.example.com/submit',
-  'https://api.example.com/reference',
-  certChainPem,
+  {
+    key: privateKeyPem,                      // PKCS8 PEM encoded private key
+    baseUrl: 'https://api.example.com',
+    submissionEndpoint: 'https://api.example.com/submit',
+    referenceEndpoint: 'https://api.example.com/reference',
+    issuerCaX5cPem,                          // PEM chain of trusted issuer CAs (mDoc trust anchors)
+    readerCaX5cPem,                          // PEM chain for the reader/verifier client cert
+  },
   oid4vpStore,
   dcApiStore
 );
 
-const session = await dcApi.create_new_session();
-const result = await dcApi.initiate_request(session.id, session.secret, request);
+const session = await dcApi.createNewSession();
+const result = await dcApi.initiateRequest(session.id, session.clientSecret, request);
 ```
 
 See the [npm-package README](npm-package/README.md) for complete documentation.

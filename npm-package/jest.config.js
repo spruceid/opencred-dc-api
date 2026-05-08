@@ -2,7 +2,7 @@
 module.exports = {
   preset: "ts-jest",
   testEnvironment: "node",
-  roots: ["<rootDir>/src", "<rootDir>/tests"],
+  roots: ["<rootDir>/tests"],
   testMatch: [
     "**/__tests__/**/*.+(ts|tsx|js)",
     "**/*.(test|spec).+(ts|tsx|js)",
@@ -33,11 +33,4 @@ module.exports = {
   bail: false,
   clearMocks: true,
   restoreMocks: true,
-  globals: {
-    "ts-jest": {
-      tsconfig: {
-        types: ["node", "jest"],
-      },
-    },
-  },
 };

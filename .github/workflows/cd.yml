@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "npm/v[0-9]+.[0-9]+.[0-9]+"
+      - "npm/v[0-9]+.[0-9]+.[0-9]+-*"
 
 jobs:
   validation:
@@ -50,7 +51,16 @@ jobs:
       - name: Build WASM and package
         run: npm run build
 
+      - name: Determine npm dist-tag
+        run: |
+          RELEASE_VERSION="${GITHUB_REF#refs/tags/npm/v}"
+          if [[ "$RELEASE_VERSION" == *-* ]]; then
+            echo "NPM_DIST_TAG=next" >> "$GITHUB_ENV"
+          else
+            echo "NPM_DIST_TAG=latest" >> "$GITHUB_ENV"
+          fi
+
       - name: Publish to npm
-        run: npm publish --access public
+        run: npm publish --access public --tag "$NPM_DIST_TAG"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_SPRUCEID_PUBLISH_TOKEN }}

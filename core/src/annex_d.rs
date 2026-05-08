@@ -133,8 +133,13 @@ pub async fn initiate_inner(
 }
 
 #[derive(Clone, Deserialize, Serialize)]
-pub struct DCAPIResponseData {
-    vp_token: HashMap<String, String>,
+#[cfg_attr(feature = "wasm", derive(tsify::Tsify))]
+#[cfg_attr(feature = "wasm", tsify(into_wasm_abi, from_wasm_abi))]
+pub struct OpenId4VPResponseData {
+    // Wallet sends this as a JSON object; type it as Record<> rather than the
+    // default JS Map that tsify emits for HashMap.
+    #[cfg_attr(feature = "wasm", tsify(type = "Record<string, string>"))]
+    pub vp_token: HashMap<String, String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -170,7 +175,7 @@ pub async fn submit_dc_response_inner(
     state: InitiatedSessionState,
     client: OID4VPClient,
     trust_anchor_registry: TrustAnchorRegistry,
-    dc_response: DCAPIResponseData,
+    dc_response: OpenId4VPResponseData,
 ) -> Result<ResponseAuthenticationOutcome, (StatusCode, serde_json::Value)> {
     let first_vp_token = dc_response.vp_token.values().next().unwrap();
     let decoded_vp_token = BASE64_URL_SAFE_NO_PAD.decode(first_vp_token).map_err(|e| {

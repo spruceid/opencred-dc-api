@@ -2,6 +2,12 @@
 
 A WebAssembly-based Node.js/TypeScript package for the DC API, providing digital credential operations with OpenID4VP support and session management through wasm-bindgen generated bindings.
 
+> ## ⚠️ Pre-1.0 software — use at your own risk
+>
+> This package has not reached a stable `1.0.0` release. The public API is subject to breaking changes between minor versions, and the underlying codebase has **not** undergone an independent security audit or third-party penetration testing.
+>
+> Do not deploy in production trust-sensitive contexts without performing your own review. Known security issues are tracked in the repository's [Security Advisories](https://github.com/spruceid/dc-api/security/advisories).
+
 ## Installation
 
 ```bash
@@ -43,26 +49,29 @@ const dcApiStore = {
 
 // Create and initialize DC API instance
 const dcApi = await DcApi.new(
-  privateKeyPem,  // PKCS8 PEM encoded private key for signing
-  'https://api.example.com',
-  'https://api.example.com/submit',
-  'https://api.example.com/reference',
-  new Uint8Array([/* your cert chain */]),
+  {
+    key: privateKeyPem,  // PKCS8 PEM encoded private key for signing
+    baseUrl: 'https://api.example.com',
+    submissionEndpoint: 'https://api.example.com/submit',
+    referenceEndpoint: 'https://api.example.com/reference',
+    issuerCaX5cPem: new Uint8Array([/* issuer CA chain (mDoc trust anchors) */]),
+    readerCaX5cPem: new Uint8Array([/* reader CA chain (verifier client cert) */]),
+  },
   oid4vpStore,
   dcApiStore
 );
 
 // Create a session
-const session = await dcApi.create_new_session();
+const session = await dcApi.createNewSession();
 
 // Make a request with the session
 const request = {
   // Your DC API request data
 };
 
-const result = await dcApi.initiate_request(
+const result = await dcApi.initiateRequest(
   session.id,
-  session.secret,
+  session.clientSecret,
   request,
   'my-app/1.0.0'
 );
@@ -73,15 +82,35 @@ const response = {
   // Your response data
 };
 
-const submitResult = await dcApi.submit_response(
+const submitResult = await dcApi.submitResponse(
   session.id,
-  session.secret,
+  session.clientSecret,
   response
 );
 
 // Clean up when done
 dcApi.free();
 ```
+
+### Using from vanilla JavaScript with type hints
+
+The package ships a `.d.ts` file. Vanilla JS callers can opt into the same editor autocomplete and type-checking that TypeScript users get, without adopting TypeScript:
+
+```js
+// @ts-check
+const { DcApi } = require("@spruceid/opencred-dc-api");
+
+/** @type {import("@spruceid/opencred-dc-api").DcApiConfig} */
+const config = {
+  key: privateKeyPem,
+  baseUrl: "https://api.example.com",
+  // ...IDE will autocomplete remaining fields and flag misspellings
+};
+
+const dcApi = await DcApi.new(config, oid4vpStore, dcApiStore);
+```
+
+The `// @ts-check` directive at the top of a `.js` file enables TypeScript-powered checking for that file only. The `@type` JSDoc imports the interface from the `.d.ts`. Modern editors (VS Code, JetBrains, Neovim with `tsserver`) pick this up automatically.
 
 ## Building from Source
 
@@ -116,18 +145,23 @@ import { DcApi } from '@spruceid/opencred-dc-api';
 
 #### Constructor
 
-##### `static new(key: string, base_url: string, submission_endpoint: string, reference_endpoint: string, cert_chain_pem: Uint8Array, oid4vp_session_store: JsOid4VpSessionStore, js_dc_api_session_store: DcApiSessionStore): Promise<DcApi>`
+##### `static new(config: DcApiConfig, oid4vp_session_store: JsOid4VpSessionStore, js_dc_api_session_store: DcApiSessionStore): Promise<DcApi>`
 
 Create and initialize a new DC API instance.
 
-**Parameters:**
-- `key`: PKCS8 PEM encoded private key used for signing operations
-- `base_url`: Base URL for the DC API
-- `submission_endpoint`: Endpoint for submitting responses
-- `reference_endpoint`: Endpoint for references
-- `cert_chain_pem`: Certificate chain in PEM format as Uint8Array
+**`DcApiConfig` fields:**
+- `key`: PKCS#8 PEM encoded private key used for signing operations
+- `baseUrl`: Base URL for the DC API
+- `submissionEndpoint`: Endpoint for submitting responses
+- `referenceEndpoint`: Endpoint for `request_uri` references
+- `issuerCaX5cPem`: PEM-encoded chain of trusted issuer CAs, used as the trust anchor registry when verifying presented mDocs (`Uint8Array`)
+- `readerCaX5cPem`: PEM-encoded chain for the reader/verifier client certificate, presented to the wallet during request signing (`Uint8Array`)
+
+**Other parameters:**
 - `oid4vp_session_store`: OID4VP session storage implementation
 - `js_dc_api_session_store`: DC API session storage implementation
+
+> **Security:** the issuer and reader chains serve different trust roles and must not be the same value. Versions prior to 0.3.0 accepted a single chain and reused it for both roles. See the security advisory for upgrade guidance.
 
 ```typescript
 const privateKeyPem = `-----BEGIN PRIVATE KEY-----
@@ -135,11 +169,14 @@ MIGH...
 -----END PRIVATE KEY-----`;
 
 const dcApi = await DcApi.new(
-  privateKeyPem,
-  'https://api.example.com',
-  'https://api.example.com/submit',
-  'https://api.example.com/reference',
-  certChainPem,
+  {
+    key: privateKeyPem,
+    baseUrl: 'https://api.example.com',
+    submissionEndpoint: 'https://api.example.com/submit',
+    referenceEndpoint: 'https://api.example.com/reference',
+    issuerCaX5cPem,
+    readerCaX5cPem,
+  },
   oid4vpStore,
   dcApiStore
 );
@@ -147,21 +184,21 @@ const dcApi = await DcApi.new(
 
 #### Methods
 
-##### `create_new_session(): Promise<any>`
+##### `createNewSession(): Promise<SessionCreationResponse>`
 
-Create a new DC API session.
+Create a new DC API session. Returns `{ id, clientSecret }`.
 
 ```typescript
-const session = await dcApi.create_new_session();
+const session = await dcApi.createNewSession();
 console.log('Session:', session);
 ```
 
-##### `initiate_request(session_id: string, session_secret: string, request: any, user_agent?: string | null): Promise<any>`
+##### `initiateRequest(session_id: string, session_secret: string, request: DCAPINamespaceRequest, user_agent?: string | null): Promise<DCAPIRequests>`
 
 Initiate a DC API request with session credentials.
 
 ```typescript
-const result = await dcApi.initiate_request(
+const result = await dcApi.initiateRequest(
   sessionId,
   sessionSecret,
   request,
@@ -169,12 +206,12 @@ const result = await dcApi.initiate_request(
 );
 ```
 
-##### `submit_response(session_id: string, session_secret: string, response: any): Promise<any>`
+##### `submitResponse(session_id: string, session_secret: string, response: DCAPIResponse): Promise<ResponseAuthenticationOutcome>`
 
 Submit a response for a DC API session.
 
 ```typescript
-const result = await dcApi.submit_response(
+const result = await dcApi.submitResponse(
   sessionId,
   sessionSecret,
   response
@@ -312,7 +349,7 @@ The WASM functions may throw errors that are propagated as JavaScript exceptions
 
 ```typescript
 try {
-  const result = await dcApi.initiate_request(
+  const result = await dcApi.initiateRequest(
     sessionId,
     sessionSecret,
     request
@@ -464,18 +501,21 @@ async function main() {
   // Initialize the API
   const privateKeyPem = process.env.PRIVATE_KEY_PEM!; // PKCS8 PEM private key
   const dcApi = await DcApi.new(
-    privateKeyPem,
-    process.env.DC_API_URL!,
-    process.env.DC_API_SUBMIT_URL!,
-    process.env.DC_API_REFERENCE_URL!,
-    new Uint8Array(Buffer.from(process.env.CERT_CHAIN!, 'base64')),
+    {
+      key: privateKeyPem,
+      baseUrl: process.env.DC_API_URL!,
+      submissionEndpoint: process.env.DC_API_SUBMIT_URL!,
+      referenceEndpoint: process.env.DC_API_REFERENCE_URL!,
+      issuerCaX5cPem: new Uint8Array(Buffer.from(process.env.ISSUER_CA_CHAIN!, 'base64')),
+      readerCaX5cPem: new Uint8Array(Buffer.from(process.env.READER_CA_CHAIN!, 'base64')),
+    },
     oid4vpStore,
     dcApiStore
   );
 
   try {
     // Create a session
-    const session = await dcApi.create_new_session();
+    const session = await dcApi.createNewSession();
     console.log('Created session:', session);
 
     // Prepare a request
@@ -487,9 +527,9 @@ async function main() {
     };
 
     // Make the request
-    const result = await dcApi.initiate_request(
+    const result = await dcApi.initiateRequest(
       session.id,
-      session.secret,
+      session.clientSecret,
       request,
       'my-app/1.0.0'
     );
@@ -501,9 +541,9 @@ async function main() {
       // Response data
     };
 
-    const submitResult = await dcApi.submit_response(
+    const submitResult = await dcApi.submitResponse(
       session.id,
-      session.secret,
+      session.clientSecret,
       response
     );
 
