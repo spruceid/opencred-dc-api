@@ -92,6 +92,26 @@ const submitResult = await dcApi.submitResponse(
 dcApi.free();
 ```
 
+### Using from vanilla JavaScript with type hints
+
+The package ships a `.d.ts` file. Vanilla JS callers can opt into the same editor autocomplete and type-checking that TypeScript users get, without adopting TypeScript:
+
+```js
+// @ts-check
+const { DcApi } = require("@spruceid/opencred-dc-api");
+
+/** @type {import("@spruceid/opencred-dc-api").DcApiConfig} */
+const config = {
+  key: privateKeyPem,
+  baseUrl: "https://api.example.com",
+  // ...IDE will autocomplete remaining fields and flag misspellings
+};
+
+const dcApi = await DcApi.new(config, oid4vpStore, dcApiStore);
+```
+
+The `// @ts-check` directive at the top of a `.js` file enables TypeScript-powered checking for that file only. The `@type` JSDoc imports the interface from the `.d.ts`. Modern editors (VS Code, JetBrains, Neovim with `tsserver`) pick this up automatically.
+
 ## Building from Source
 
 This package wraps a Rust WASM binary. To build the complete package:
