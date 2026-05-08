@@ -822,6 +822,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "coset"
+version = "0.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1eb98d5e9155e2cf7cd942c8b3033097d4563b6fb0a00b9caecb74669555c058"
+dependencies = [
+ "ciborium",
+ "ciborium-io",
+]
+
+[[package]]
 name = "cpufeatures"
 version = "0.2.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1057,7 +1067,7 @@ dependencies = [
  "async-trait",
  "base64 0.22.1",
  "ciborium",
- "coset",
+ "coset 0.4.2",
  "getrandom 0.4.2",
  "hpke",
  "http 1.4.0",
@@ -2451,7 +2461,7 @@ dependencies = [
  "clap",
  "clap-stdin",
  "const-oid 0.9.6",
- "coset",
+ "coset 0.3.8",
  "der 0.7.10",
  "digest 0.10.7",
  "ecdsa",
@@ -4846,7 +4856,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e9ee235f4f264d324a9092b2a045ae0354133340060194d8c8b9ab62294a5690"
 dependencies = [
  "ciborium",
- "coset",
+ "coset 0.3.8",
  "serde",
  "ssi-claims-core",
  "ssi-crypto",
