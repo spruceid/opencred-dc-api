@@ -62,14 +62,14 @@ const dcApi = await DcApi.new(
 );
 
 // Create a session
-const session = await dcApi.create_new_session();
+const session = await dcApi.createNewSession();
 
 // Make a request with the session
 const request = {
   // Your DC API request data
 };
 
-const result = await dcApi.initiate_request(
+const result = await dcApi.initiateRequest(
   session.id,
   session.clientSecret,
   request,
@@ -82,7 +82,7 @@ const response = {
   // Your response data
 };
 
-const submitResult = await dcApi.submit_response(
+const submitResult = await dcApi.submitResponse(
   session.id,
   session.clientSecret,
   response
@@ -164,21 +164,21 @@ const dcApi = await DcApi.new(
 
 #### Methods
 
-##### `create_new_session(): Promise<any>`
+##### `createNewSession(): Promise<SessionCreationResponse>`
 
-Create a new DC API session.
+Create a new DC API session. Returns `{ id, clientSecret }`.
 
 ```typescript
-const session = await dcApi.create_new_session();
+const session = await dcApi.createNewSession();
 console.log('Session:', session);
 ```
 
-##### `initiate_request(session_id: string, session_secret: string, request: any, user_agent?: string | null): Promise<any>`
+##### `initiateRequest(session_id: string, session_secret: string, request: DCAPINamespaceRequest, user_agent?: string | null): Promise<DCAPIRequests>`
 
 Initiate a DC API request with session credentials.
 
 ```typescript
-const result = await dcApi.initiate_request(
+const result = await dcApi.initiateRequest(
   sessionId,
   sessionSecret,
   request,
@@ -186,12 +186,12 @@ const result = await dcApi.initiate_request(
 );
 ```
 
-##### `submit_response(session_id: string, session_secret: string, response: any): Promise<any>`
+##### `submitResponse(session_id: string, session_secret: string, response: DCAPIResponse): Promise<ResponseAuthenticationOutcome>`
 
 Submit a response for a DC API session.
 
 ```typescript
-const result = await dcApi.submit_response(
+const result = await dcApi.submitResponse(
   sessionId,
   sessionSecret,
   response
@@ -329,7 +329,7 @@ The WASM functions may throw errors that are propagated as JavaScript exceptions
 
 ```typescript
 try {
-  const result = await dcApi.initiate_request(
+  const result = await dcApi.initiateRequest(
     sessionId,
     sessionSecret,
     request
@@ -495,7 +495,7 @@ async function main() {
 
   try {
     // Create a session
-    const session = await dcApi.create_new_session();
+    const session = await dcApi.createNewSession();
     console.log('Created session:', session);
 
     // Prepare a request
@@ -507,7 +507,7 @@ async function main() {
     };
 
     // Make the request
-    const result = await dcApi.initiate_request(
+    const result = await dcApi.initiateRequest(
       session.id,
       session.clientSecret,
       request,
@@ -521,7 +521,7 @@ async function main() {
       // Response data
     };
 
-    const submitResult = await dcApi.submit_response(
+    const submitResult = await dcApi.submitResponse(
       session.id,
       session.clientSecret,
       response

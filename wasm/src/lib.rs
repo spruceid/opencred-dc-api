@@ -145,7 +145,7 @@ impl DcApi {
         })
     }
 
-    #[wasm_bindgen]
+    #[wasm_bindgen(js_name = createNewSession)]
     pub async fn create_new_session(&self) -> Result<SessionCreationResponse, JsValue> {
         let creation = self
             .dc_api_session
@@ -156,7 +156,7 @@ impl DcApi {
         Ok(creation.session_creation_response)
     }
 
-    #[wasm_bindgen]
+    #[wasm_bindgen(js_name = initiateRequest)]
     pub async fn initiate_request(
         &self,
         session_id: String,
@@ -210,7 +210,7 @@ impl DcApi {
         Ok(DCAPIRequests { requests })
     }
 
-    #[wasm_bindgen(unchecked_return_type = "ResponseAuthenticationOutcome")]
+    #[wasm_bindgen(js_name = submitResponse, unchecked_return_type = "ResponseAuthenticationOutcome")]
     pub async fn submit_response(
         &self,
         session_id: String,

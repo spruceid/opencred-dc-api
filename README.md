@@ -61,8 +61,8 @@ const dcApi = await DcApi.new(
   dcApiStore
 );
 
-const session = await dcApi.create_new_session();
-const result = await dcApi.initiate_request(session.id, session.clientSecret, request);
+const session = await dcApi.createNewSession();
+const result = await dcApi.initiateRequest(session.id, session.clientSecret, request);
 ```
 
 See the [npm-package README](npm-package/README.md) for complete documentation.
