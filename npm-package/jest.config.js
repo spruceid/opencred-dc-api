@@ -33,11 +33,4 @@ module.exports = {
   bail: false,
   clearMocks: true,
   restoreMocks: true,
-  globals: {
-    "ts-jest": {
-      tsconfig: {
-        types: ["node", "jest"],
-      },
-    },
-  },
 };
