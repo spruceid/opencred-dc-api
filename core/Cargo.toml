@@ -32,6 +32,6 @@ sha2 = "0.10.9"
 url = { version = "2.5.8", features = ["serde"] }
 uuid = { version = "1.10.0", features = ["serde"] }
 x509-cert = { version = "0.2.4", features = ["builder", "hazmat"] }
-tracing = "0.1.41"
+tracing = "0.1.44"
 tsify = { version = "0.5", default-features = false, features = ["js"], optional = true }
 wasm-bindgen = { version = "=0.2.101", optional = true }
