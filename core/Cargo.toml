@@ -12,7 +12,7 @@ default = []
 wasm = ["dep:tsify", "dep:wasm-bindgen"]
 
 [dependencies]
-anyhow = "1.0.99"
+anyhow = "1.0.102"
 async-trait = "0.1.89"
 base64 = "0.22.1"
 ciborium = "0.2.2"
